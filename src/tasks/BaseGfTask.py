@@ -81,26 +81,30 @@ class BaseGfTask(BaseTask):
             self.click_box(result, after_sleep=1)
             start_result = self.wait_ocr(match=[re.compile('行动结束'), re.compile('还有可部署')],
                                          raise_if_not_found=False, time_out=15)
-            if start_result and '行动结束' != start_result[0].name:
-                self.log_info('阵容没上满!', notify=True)
+            if not start_result:
+                start_result = self.wait_ocr(match=[re.compile('行动完成')], box='right', raise_if_not_found=False, time_out=15)
+            ok_bool = bool(start_result) and "行动完成" in [r.name for r in start_result]
+            if not ok_bool:
+                if start_result and '行动结束' != start_result[0].name:
+                    self.log_info('阵容没上满!', notify=True)
 
-                self.wait_click_ocr(match=['确认'], box='bottom', time_out=5,
-                                    raise_if_not_found=True)
-                self.wait_ocr(match=['行动结束'], box='bottom_right',
-                              raise_if_not_found=False, time_out=15)
-                # start_result = self.wait_ocr(match=['行动结束'], box='bottom_right',
-                #                              raise_if_not_found=False, time_out=15)
-            if not start_result and has_dialog_behind_start:
-                start_result = self.skip_dialogs(end_match=['作战开始', '行动结束'], end_box='bottom', time_out=120,
-                                                 has_dialog=has_dialog)
-                if self.wait_ocr(match='注意', box='top'):
-                    self.wait_click_ocr(match='取消', after_sleep=2)
-            if start_result and need_click_auto:
-                self.sleep(0.5)
-                if self.is_adb():
-                    self.click_relative(0.85, 0.05, after_sleep=1)
-                else:
-                    self.click_relative(0.88, 0.04, after_sleep=1)
+                    self.wait_click_ocr(match=['确认'], box='bottom', time_out=5,
+                                        raise_if_not_found=True)
+                    self.wait_ocr(match=['行动结束'], box='bottom_right',
+                                raise_if_not_found=False, time_out=15)
+                    # start_result = self.wait_ocr(match=['行动结束'], box='bottom_right',
+                    #                              raise_if_not_found=False, time_out=15)
+                if not start_result and has_dialog_behind_start:
+                    start_result = self.skip_dialogs(end_match=['作战开始', '行动结束'], end_box='bottom', time_out=120,
+                                                    has_dialog=has_dialog)
+                    if self.wait_ocr(match='注意', box='top'):
+                        self.wait_click_ocr(match='取消', after_sleep=2)
+                if start_result and need_click_auto:
+                    self.sleep(0.5)
+                    if self.is_adb():
+                        self.click_relative(0.85, 0.05, after_sleep=1)
+                    else:
+                        self.click_relative(0.88, 0.04, after_sleep=1)
 
         while results := self.skip_dialogs(
                 end_match=['任务完成', '任务失败', '战斗失败', '对战胜利', '对战失败', '确认', '确认结算'],
