@@ -10,8 +10,8 @@ from ok import BaseTask
 class CommunityClient(BaseTask):
 
     # ================== 初始化 ==================
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(self,*args, **kwargs)
         self.BASE_API = "https://gf2-bbs-api.exiliumgf.com"
         self.PROXIES = {"http": "", "https": ""}
         self.COMMON_HEADERS = {

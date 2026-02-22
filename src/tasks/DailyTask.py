@@ -114,7 +114,7 @@ class DailyTask(BaseGfTask):
     def community_daily(self):
         user = self.config.get('用户名')
         pwd = self.config.get('密码')
-        com = CommunityClient()
+        com = CommunityClient(self)
         self.info_set('current_task', 'community_daily')
         com.main(user, pwd)
 
