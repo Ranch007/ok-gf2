@@ -27,6 +27,11 @@ class DailyTask(BaseGfTask):
             输入框和选择框配置
 
         """
+        auto_loop_skip_list=['体力本','自动刷体力','刷钱本','竞技场']
+        auto_loop_skip_dict={i:"开启自主循环后会跳过该项" for i in auto_loop_skip_list}
+        self.config_description.update(
+            auto_loop_skip_dict
+        )
         self.default_config.update({
             '已确认启用游戏内全局自动功能': False,
             '当前物资关卡名称': '铸碑者的黎明',
