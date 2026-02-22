@@ -16,21 +16,17 @@ config = {
             'use_openvino': True,
         }
     },
-    'windows': {  # required  when supporting windows game
-        'exe': 'GF2_Exilium.exe',
-        # 'calculate_pc_exe_path': calculate_pc_exe_path,
+    'windows': {
+        'exe': ['GF2_Exilium.exe'],  # 新版统一使用 list
         # 'hwnd_class': 'UnrealWindow',
-        'interaction': 'Genshin',
-        'can_bit_blt': True,  # default false, opengl games does not support bit_blt
-        'bit_blt_render_full': True,
+        'interaction': 'Genshin',  # 或 EfInteraction，根据项目
+        'capture_method': ['WGC', 'BitBlt_RenderFull'],
         'check_hdr': True,
         'force_no_hdr': False,
-        # 'check_night_light': True,
-        'force_no_night_light': False,
         'require_bg': True
     },
     'template_matching': {
-        'coco_feature_json': os.path.join('assets', 'result.json'),
+        'coco_feature_json': os.path.join('assets', 'coco_detection.json'),
         'default_horizontal_variance': 0.002,
         'default_vertical_variance': 0.002,
         'default_threshold': 0.8,

@@ -1,6 +1,6 @@
 import re
 
-from ok import Logger, find_boxes_by_name, find_boxes_within_boundary
+from ok import Logger, find_boxes_by_name,Box
 from src.tasks.BaseGfTask import BaseGfTask, pop_ups, stamina_re, map_re, parse_time_option
 from src.tasks.CommunityClient import CommunityClient
 
@@ -803,7 +803,41 @@ def sort_characters_by_priority(chars, priority):
 
     return [char_object for _, _, char_object in sorted_chars]  # Extract the character objects
 
+def find_boxes_within_boundary(
+    boxes: list["Box"],
+    boundary_box: "Box",
+    sort: bool = False
+) -> list["Box"]:
+    """
+    查找完全包含在边界框内的框。
+    """
 
+    if not boxes or not boundary_box:
+        return []
+
+    # 计算边界框四个边
+    bx1 = boundary_box.x
+    by1 = boundary_box.y
+    bx2 = boundary_box.x + boundary_box.width
+    by2 = boundary_box.y + boundary_box.height
+
+    result = []
+
+    for box in boxes:
+        x1 = box.x
+        y1 = box.y
+        x2 = box.x + box.width
+        y2 = box.y + box.height
+
+        # 完全包含判断
+        if x1 >= bx1 and y1 >= by1 and x2 <= bx2 and y2 <= by2:
+            result.append(box)
+
+    if sort:
+        # 从上到下，再从左到右
+        result.sort(key=lambda b: (b.y, b.x))
+
+    return result
 text_fix = {
     '再次派造': '再次派遣',
 }
