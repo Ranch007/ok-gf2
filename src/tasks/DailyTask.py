@@ -29,9 +29,7 @@ class DailyTask(BaseGfTask):
         """
         auto_loop_skip_list=['体力本','自动刷体力','刷钱本','竞技场']
         auto_loop_skip_dict={i:"开启自主循环后会跳过该项" for i in auto_loop_skip_list}
-        self.config_description.update(
-            auto_loop_skip_dict
-        )
+        self.config_description.update(auto_loop_skip_dict | {"尘烟":'需开启班组项'})
         self.default_config.update({
             '已确认启用游戏内全局自动功能': False,
             '当前物资关卡名称': '铸碑者的黎明',
@@ -57,6 +55,7 @@ class DailyTask(BaseGfTask):
             '尘烟': True,
             '领任务': True,
             '大月卡': True,
+            '探索领取': True,
         })
 
     def _init_stamina_options(self):
@@ -88,6 +87,7 @@ class DailyTask(BaseGfTask):
             ('班组', self.guild),
             ('领任务', self.claim_quest),
             ('大月卡', self.xunlu),
+            ('探索领取',self.explore_claim),
         ]
 
         failed_tasks = []
@@ -110,6 +110,16 @@ class DailyTask(BaseGfTask):
             self.log_info(f"以下任务未完成或失败: {failed_tasks}", notify=True)
         else:
             self.log_info("日常完成!", notify=True)
+    def explore_claim(self):
+        self.info_set('current_task', 'explore_claim')
+        if not self.wait_click_ocr(match='限时开启', box='top_right',after_sleep=2, time_out=2, raise_if_not_found=True):
+            return
+        if not self.wait_click_ocr(match='边界推进', box='top_right',after_sleep=2, time_out=2, raise_if_not_found=True):
+            return
+        if not self.wait_click_ocr(match=re.compile('采集'), box='bottom_right',after_sleep=2, time_out=2, raise_if_not_found=True):
+            return
+        if not self.wait_click_ocr(match=re.compile('领取'), box='bottom_right', time_out=2, raise_if_not_found=True):
+            return
 
     def community_daily(self):
         user = self.config.get('用户名')
