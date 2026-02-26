@@ -99,7 +99,7 @@ class BaseGfTask(BaseTask):
             self.sleep(2)
             self.click_box(result, after_sleep=1)
             start_result = self.wait_ocr(match=[re.compile('行动结束'), re.compile('还有可部署')],
-                                         raise_if_not_found=False, time_out=15)
+                                         raise_if_not_found=False, time_out=30)
             if not start_result:
                 start_result = self.wait_ocr(match=[re.compile('行动完成')], box='right', raise_if_not_found=False, time_out=15)
             ok_bool = bool(start_result) and "行动完成" in [r.name for r in start_result]
