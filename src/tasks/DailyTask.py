@@ -120,6 +120,9 @@ class DailyTask(BaseGfTask):
             return
         if not self.wait_click_ocr(match=re.compile('领取'), box='bottom_right', time_out=2, raise_if_not_found=True):
             return
+        self.wait_pop_up()
+        if not self.wait_click_ocr(match=re.compile('派遣'), box='bottom_right',after_sleep=2, time_out=2, raise_if_not_found=False):
+            return
 
     def community_daily(self):
         user = self.config.get('用户名')
