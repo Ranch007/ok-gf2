@@ -95,6 +95,15 @@ msgstr "Monthly"
 msgid "Once"
 msgstr "Once"
 
+msgid "Custom"
+msgstr "Custom"
+
+msgid "days"
+msgstr "days"
+
+msgid "hours"
+msgstr "hours"
+
 msgid "Ready"
 msgstr "Ready"
 

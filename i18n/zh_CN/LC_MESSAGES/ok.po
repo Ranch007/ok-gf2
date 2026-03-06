@@ -96,6 +96,15 @@ msgstr "每月"
 msgid "Once"
 msgstr "一次"
 
+msgid "Custom"
+msgstr "自定义"
+
+msgid "days"
+msgstr "天"
+
+msgid "hours"
+msgstr "小时"
+
 msgid "Ready"
 msgstr "就绪"
 
