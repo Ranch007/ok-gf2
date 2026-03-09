@@ -16,8 +16,8 @@ msgstr ""
 
 # --- Previous Strings ---
 
-msgid "^\d+天\d+小时"
-msgstr "^\d+\s+[Dd]ays?\s+\d+\s+[Hh]ours?"
+msgid "^\d+\s+[Dd]ays?\s+\d+\s+[Hh]ours?"
+msgstr "^\d+天\d+小时"
 
 # Strings extracted from the 'pop_ups' list used in 'match' parameter
 msgid "Click anywhere to exit"
@@ -62,8 +62,8 @@ msgstr "行动结束"
 
 # From auto_battle: self.wait_ocr(match=['行动结束', re.compile('还有可部署')], ...)
 # Note: This was inside re.compile, but the string itself is Chinese used in match param
-msgid "还有可部署"
-msgstr "still deploy"
+msgid "still deploy"
+msgstr "还有可部署"
 
 # From auto_battle: self.skip_dialogs(end_match=['任务完成', ...], ...) -> used inside skip_dialogs
 msgid "Mission Completed"
@@ -98,8 +98,8 @@ msgid "PublicArea"
 msgstr "公共区"
 
 # From is_main: self.ocr(match=['整备室', '公共区', '招募'], ...)
-msgid "招募"
-msgstr "Recruitment"
+msgid "Recruitment"
+msgstr "招募"
 
 # From is_main: self.ocr(..., match=["点击开始", "点击空白处关闭", "取消"], ...)
 msgid "Start"
@@ -291,8 +291,8 @@ msgstr "活动战役"
 
 # From activity: self.wait_ocr(match=['活动战役', re.compile('物资')], ...)
 # From activity: if wuzi := self.ocr(match=re.compile('物资'), ...)
-msgid "物资"
-msgstr "Supplies"
+msgid "Supplies"
+msgstr "物资"
 
 # From gongongqu: self.wait_click_ocr(match=['调度室'], ...)
 msgid "Dispatch Room"
