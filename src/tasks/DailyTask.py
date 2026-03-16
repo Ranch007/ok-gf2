@@ -392,15 +392,15 @@ class DailyTask(BaseGfTask):
                 ),
             ],
             [
-                lambda: self.wait_click_ocr(match=["确认"],settle_time=2, after_sleep=2),
+                lambda: self.wait_click_ocr(match=["确认"],settle_time=2, after_sleep=2,log=True),
             ],
             [
                 lambda: self.wait_click_ocr(
-                    match=["循环结束"], time_out=600, box="top", after_sleep=2
+                    match=re.compile("循环结束"), time_out=600, box="top", after_sleep=2, log=True
                 ),
             ],
             [
-                lambda: self.wait_click_ocr(match=["确认"],settle_time=2, after_sleep=2),
+                lambda: self.wait_click_ocr(match=["确认"],settle_time=2, after_sleep=2, log=True),
             ],
         ]
         # 执行
