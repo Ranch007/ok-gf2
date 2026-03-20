@@ -37,7 +37,8 @@ class BaseGfTask(BaseTask):
             "浊刻": ["芙洛伦", "妮基塔", "春田", "朝晖", "塞布丽娜", "托洛洛", "寇尔芙"],
             "酸蚀": ["翡图萨", "哈卜茜", "琳德", "米什缇", "可露凯", "纳甘", "佩里缇亚", "纳美西丝"]
         }
-        self.box=ScreenPosition(self)
+        self.box = ScreenPosition(self)
+
     def isolate_by_hsv_ranges(self, frame, ranges, invert=True, kernel_size=2):
         """
         :param frame: 输入图像（BGR）
@@ -56,6 +57,7 @@ class BaseGfTask(BaseTask):
         作用：生成固定 HSV 范围的图像处理函数。
         """
         return partial(self.isolate_by_hsv_ranges, ranges=ranges)
+
     def get_role_by_name(self, name):
         return next((k for k, v in self.roles_dict.items() if name in v), None)
 
@@ -104,7 +106,8 @@ class BaseGfTask(BaseTask):
             start_result = self.wait_ocr(match=[re.compile('行动结束'), re.compile('还有可部署')],
                                          raise_if_not_found=False, time_out=30)
             if not start_result:
-                start_result = self.wait_ocr(match=[re.compile('行动完成')], box=self.box.right, raise_if_not_found=False, time_out=15)
+                start_result = self.wait_ocr(match=[re.compile('行动完成')], box=self.box.right,
+                                             raise_if_not_found=False, time_out=15)
             ok_bool = bool(start_result) and "行动完成" in [r.name for r in start_result]
             if not ok_bool:
                 if start_result and '行动结束' != start_result[0].name:
@@ -113,12 +116,13 @@ class BaseGfTask(BaseTask):
                     self.wait_click_ocr(match=['确认'], box=self.box.bottom, time_out=5,
                                         raise_if_not_found=True)
                     self.wait_ocr(match=['行动结束'], box=self.box.bottom_right,
-                                raise_if_not_found=False, time_out=15)
+                                  raise_if_not_found=False, time_out=15)
                     # start_result = self.wait_ocr(match=['行动结束'], box=self.box.bottom_right,
                     #                              raise_if_not_found=False, time_out=15)
                 if not start_result and has_dialog_behind_start:
-                    start_result = self.skip_dialogs(end_match=['作战开始', '行动结束'], end_box=self.box.bottom, time_out=120,
-                                                    has_dialog=has_dialog)
+                    start_result = self.skip_dialogs(end_match=['作战开始', '行动结束'], end_box=self.box.bottom,
+                                                     time_out=120,
+                                                     has_dialog=has_dialog)
                     if self.wait_ocr(match='注意', box=self.box.top):
                         self.wait_click_ocr(match='取消', after_sleep=2)
                 if start_result and need_click_auto:
@@ -265,17 +269,19 @@ class BaseGfTask(BaseTask):
                 return True
 
         return False
+
     def break_if_not_enough(self):
         if self.wait_ocr(match=re.compile('坍塌晶条'), time_out=2, log=True):
             self.wait_click_ocr(match=['取消'], after_sleep=2, time_out=2, raise_if_not_found=True)
             return True
         return False
-    def back_if_not_ocr_match(self,match,box=None,max_back_count=1,raise_if_not_found=False):
-        for count in range(max_back_count+1):
+
+    def back_if_not_ocr_match(self, match, box=None, max_back_count=1, raise_if_not_found=False):
+        for count in range(max_back_count + 1):
             temp_raise_if_not_found = False
-            if count==max_back_count:
+            if count == max_back_count:
                 temp_raise_if_not_found = True
-            if self.wait_ocr(match=match, box=box,  raise_if_not_found=temp_raise_if_not_found):
+            if self.wait_ocr(match=match, box=box, raise_if_not_found=temp_raise_if_not_found):
                 return
             else:
                 self.back(after_sleep=2)
@@ -359,6 +365,44 @@ class BaseGfTask(BaseTask):
 
         return remaining
 
+    def click_box_by_match_position(self, box: Union[Box, list[Box]], match: Union[str, re.Pattern], after_sleep=None):
+        if isinstance(box, list):
+            box = box[0]
+        text = box.name
+
+        # 找匹配位置
+        if isinstance(match, str):
+            start = text.find(match)
+            if start == -1:
+                return self.click_box(box)
+            end = start + len(match)
+
+        else:  # regex
+            m = match.search(text)
+            if not m:
+                return self.click_box(box)
+            start = m.start()
+            end = m.end()
+
+        mid = (start + end) / 2
+        ratio = mid / len(text)
+
+        x = box.x
+        y = box.y
+        w = box.width
+        h = box.height
+
+        click_y = y + h // 2
+
+        if ratio < 0.33:
+            click_x = x + h
+        elif ratio > 0.66:
+            click_x = x + w - h
+        else:
+            click_x = x + w // 2
+
+        self.click(click_x, click_y, after_sleep=after_sleep)
+
     def fast_disassemble_loop(self, model_re):
         while self.wait_click_ocr(match=['快捷选择'], after_sleep=2):
             ocr_select_num = self.wait_ocr(
@@ -423,7 +467,6 @@ class BaseGfTask(BaseTask):
                 self.send_key(key)
             if i < len(keys) - 1 or sleep_after_last:
                 self.sleep(sleep_between)
-
 
     def run_steps_with_retry_and_rollback(self, steps):
         """
