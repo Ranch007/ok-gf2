@@ -390,7 +390,7 @@ class BaseGfTask(BaseTask):
         x = box.x
         y = box.y
         w = box.width
-        h = box.height
+        h = min(box.height, int(30/1080 * self.height))  # 限制高度，避免匹配到下方的按钮
 
         click_y = y + h // 2
 

@@ -369,7 +369,7 @@ class DailyTask(BaseGfTask):
 
     def gongongqu(self):
         self.info_set('current_task', 'gongongqu')
-        if result := self.wait_ocr(match=re.compile('委托'), box=self.box.bottom_right, raise_if_not_found=True):
+        if result := self.wait_ocr(match=re.compile('委托'), box=self.box.bottom_right, raise_if_not_found=True, log=True):
             self.click_box_by_match_position(result, "委托", after_sleep=2)
             buttons = self.find_feature(feature_name='ggq_can_button', box=self.box.left)
             if not self.config.get('自主循环'):
