@@ -265,9 +265,8 @@ class DailyTask(BaseGfTask):
         self.info_set('current_task', 'claim_quest')
         if result := self.wait_ocr(match=re.compile('委托'), box=self.box.bottom_right, raise_if_not_found=True):
             self.click_box_by_match_position(result, "委托", after_sleep=2)
-            self.wait_click_ocr(match=[re.compile('键领取'), '领取全部'], box=self.box.bottom_right, time_out=6,
-                                log=True,
-                                raise_if_not_found=False, after_sleep=2)
+            self.wait_click_ocr(match=[re.compile('领取')], box=self.box_of_screen(1423/1920,939/1080,1,1), time_out=6,
+                                log=True,raise_if_not_found=False, after_sleep=2)
             results = self.wait_ocr(match=['领取全部', '已全部领取'], box=self.box.left, time_out=15, log=True)
             # if results and results[0].name == '一键领取':
             if results:
@@ -299,7 +298,7 @@ class DailyTask(BaseGfTask):
             self.click_box_by_match_position(box, '巡录', after_sleep=2)
             self.wait_click_ocr(match=['沿途行动'], box=self.box.top_right, time_out=4,
                                 raise_if_not_found=True, after_sleep=1)
-            self.wait_click_ocr(match=[re.compile('键领取'), '领取全部'], box=self.box.bottom_right, time_out=4,
+            self.wait_click_ocr(match=[re.compile('领取')], box=self.box_of_screen(1423/1920,939/1080,1,1), time_out=4,
                                 raise_if_not_found=False, after_sleep=1)
             self.ensure_main()
 
@@ -540,7 +539,7 @@ class DailyTask(BaseGfTask):
     def chenyan(self):
         if not self.config.get('尘烟'):
             return
-        end = self.ocr(match=re.compile('后结束'), box=self.box.bottom_right, log=True)
+        end = self.ocr(match=re.compile('前线'), box=self.box.bottom_right, log=True)
         if not end:
             return
         self.click(end, after_sleep=1)
