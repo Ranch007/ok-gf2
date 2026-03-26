@@ -545,7 +545,7 @@ class DailyTask(BaseGfTask):
         self.click(end, after_sleep=1)
         result = self.ocr(0.89, 0.01, 0.99, 0.1, match=stamina_re, box=self.box.top_right)
         if not result:
-            raise Exception('找不到尘烟票')
+            return
         while True:
             tickets = int(result[0].name.split('/')[0])
             self.log_info(f'chenyan tickets {tickets}')
