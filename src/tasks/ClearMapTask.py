@@ -10,7 +10,7 @@ class ClearMapTask(BaseGfTask):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.name = "推图,可尝试多种识别方式"
+        self.name = "推图"
         self.description = "从要推的图的最左边开始"
         # self.default_config.update({"识别模式": "除杂色ocr1"})
         # self.config_description.update({
