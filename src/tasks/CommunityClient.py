@@ -1,23 +1,18 @@
 import hashlib
 import json
 import time
+from typing import List, Optional
+
 import requests
-from typing import Optional, List
-
-from ok import BaseTask
 
 
-class CommunityClient(BaseTask):
-
-    # ================== 初始化 ==================
-    def __init__(self, *args, **kwargs):
-        super().__init__(self,*args, **kwargs)
-        self.BASE_API = "https://gf2-bbs-api.exiliumgf.com"
-        self.PROXIES = {"http": "", "https": ""}
-        self.COMMON_HEADERS = {
-            "Accept": "application/json",
-            "User-Agent": "Mozilla/5.0"
-        }
+class CommunityMixin:
+    BASE_API = "https://gf2-bbs-api.exiliumgf.com"
+    PROXIES = {"http": "", "https": ""}
+    COMMON_HEADERS = {
+        "Accept": "application/json",
+        "User-Agent": "Mozilla/5.0",
+    }
 
     # ================== 通用请求 ==================
     def request_json(
@@ -246,6 +241,10 @@ class CommunityClient(BaseTask):
         self.sign_in(auth_token)
 
         topics = self.get_top_topic_ids(5)
+        if not topics:
+            self.log_info("未获取到可用帖子，跳过浏览/点赞/分享")
+            return
+
         for tid in topics[:3]:
             self.view_topic(auth_token, tid)
             time.sleep(0.6)
@@ -257,10 +256,15 @@ class CommunityClient(BaseTask):
         self.share_topic(auth_token, topics[0])
         self.log_info("每日任务完成")
 
-    def main(self, user, pwd):
+    def run_community_flow(self, user: str, pwd: str) -> bool:
         token = self.login(user, pwd)
         if token:
             self.daily_tasks(token)
             self.auto_exchange(token)
-        else:
-            self.log_info("未登录")
+            return True
+
+        self.log_info("未登录")
+        return False
+
+    def main(self, user, pwd):
+        return self.run_community_flow(user, pwd)

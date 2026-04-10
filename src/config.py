@@ -26,6 +26,13 @@ config = {
         "force_no_hdr": False,  # True=当用户开启AutoHDR时候禁止使用
         "require_bg": True,  # 要求使用后台截图
     },
+    # 模板标签配置信息
+    'template_tab': {
+    # 是否生成标签枚举
+        'generate_label_enum': True,
+    # 标签枚举的相对路径
+        'label_enum_relative_path': 'src/data/FeatureList',
+    },
     "start_timeout": 60,  # default 60
     "window_size": {"width": 1200, "height": 800, "min_width": 600, "min_height": 450},  # ok-script窗口大小
     "supported_resolution": {

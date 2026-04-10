@@ -2,12 +2,12 @@ import re
 import time
 from ok import Logger, find_boxes_by_name, Box
 from src.tasks.BaseGfTask import BaseGfTask, pop_ups, stamina_re, map_re, parse_time_option
-from src.tasks.CommunityClient import CommunityClient
+from src.tasks.CommunityClient import CommunityMixin
 
 logger = Logger.get_logger(__name__)
 
 
-class DailyTask(BaseGfTask):
+class DailyTask(CommunityMixin, BaseGfTask):
 
     def __init__(self, *args, **kwargs):
         """
@@ -133,9 +133,8 @@ class DailyTask(BaseGfTask):
     def community_daily(self):
         user = self.config.get('用户名')
         pwd = self.config.get('密码')
-        com = CommunityClient(self)
         self.info_set('current_task', 'community_daily')
-        com.main(user, pwd)
+        self.run_community_flow(user, pwd)
 
     def confirm_auto_battle_up(self):
         """
@@ -231,7 +230,7 @@ class DailyTask(BaseGfTask):
 
     def activities(self):
         self.info_set('current_task', 'activity_stamina')
-        self.wait_click_ocr(match=['活动'], box=self.box.bottom_right, after_sleep=0.5, raise_if_not_found=True)
+        self.wait_click_ocr(match=['活动'], box=self.box._activities, after_sleep=0.5, raise_if_not_found=True)
         if self.config.get("情报补给"):
             if self.wait_click_ocr(match=['情报补给'], box=self.box.left, time_out=3, raise_if_not_found=False,
                                    after_sleep=1):
@@ -263,7 +262,7 @@ class DailyTask(BaseGfTask):
 
     def claim_quest(self):
         self.info_set('current_task', 'claim_quest')
-        if result := self.wait_ocr(match=re.compile('委托'), box=self.box.bottom_right, raise_if_not_found=True):
+        if result := self.wait_ocr(match=re.compile('委托'), box=self.box._claim, raise_if_not_found=True):
             self.click_box_by_match_position(result, "委托", after_sleep=2)
             self.wait_click_ocr(match=[re.compile('领取')], box=self.box_of_screen(1423/1920,939/1080,1,1), time_out=6,
                                 log=True,raise_if_not_found=False, after_sleep=2)
@@ -293,7 +292,7 @@ class DailyTask(BaseGfTask):
 
     def xunlu(self):
         self.info_set('current_task', 'xunlu')
-        box = self.wait_ocr(match=['巡录'], box=self.box.bottom, time_out=2, raise_if_not_found=False)
+        box = self.wait_ocr(match=['巡录'], box=self.box._xunlun, time_out=2, raise_if_not_found=False)
         if box:
             self.click_box_by_match_position(box, '巡录', after_sleep=2)
             self.wait_click_ocr(match=['沿途行动'], box=self.box.top_right, time_out=4,
@@ -368,7 +367,7 @@ class DailyTask(BaseGfTask):
 
     def gongongqu(self):
         self.info_set('current_task', 'gongongqu')
-        if result := self.wait_ocr(match=re.compile('委托'), box=self.box.bottom_right, raise_if_not_found=True, log=True):
+        if result := self.wait_ocr(match=re.compile('委托'), box=self.box._claim, raise_if_not_found=True, log=True):
             self.click_box_by_match_position(result, "委托", after_sleep=2)
             start_time = time.time()
             while True:
@@ -521,7 +520,7 @@ class DailyTask(BaseGfTask):
 
     def guild(self):
         self.info_set('current_task', 'guild')
-        if result := self.wait_ocr(match=['班组'], box=self.box.bottom_right, raise_if_not_found=True):
+        if result := self.wait_ocr(match=['班组'], box=self.box._group, raise_if_not_found=True):
             self.click_box_by_match_position(result, "班组", after_sleep=2)
             self.wait_click_ocr(match=['要务'], box=self.box.bottom_right, after_sleep=0.5, raise_if_not_found=True,
                                 settle_time=2)
