@@ -9,6 +9,18 @@ logger = Logger.get_logger(__name__)
 
 
 class DailyTask(CommunityMixin, BaseGfTask):
+    def wait_ocr_until_count(self, match, box=None, min_count=2, timeout=5, interval=0.5, **kwargs):
+        """
+        固定时间内循环OCR，检测到对象数>=min_count立即返回，否则超时。
+        """
+        start_time = time.time()
+        while True:
+            results = self.wait_ocr(match=match, box=box, raise_if_not_found=False, time_out=interval, **kwargs)
+            if results and len(results) >= min_count:
+                return results
+            if time.time() - start_time >= timeout:
+                return results  # 可能为None或不足min_count
+        
 
     def __init__(self, *args, **kwargs):
         """
@@ -359,9 +371,15 @@ class DailyTask(CommunityMixin, BaseGfTask):
                     if activity_count >= len(activity_wuzi_names):
                         activity_count -= 1
                     name_re = re.escape(activity_wuzi_names[activity_count])
-                    if to_clicks := self.wait_ocr(match=[re.compile(f"{name_re}[·・：]上[篇筒]"),
-                                                         re.compile(f"{name_re}[·・：]下[篇筒]")],
-                                                  raise_if_not_found=False, time_out=6, settle_time=2, log=True):
+                    to_clicks = self.wait_ocr_until_count(
+                        match=[re.compile(f"{name_re}[·・：]上[篇筒]"), re.compile(f"{name_re}[·・：]下[篇筒]")],
+                        box=None,
+                        min_count=2,
+                        timeout=5,
+                        settle_time=2,
+                        log=True
+                    )
+                    if to_clicks :
                         activity_count += 1
                         to_clicks2 = None
                         for click in to_clicks:
