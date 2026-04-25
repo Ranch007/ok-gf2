@@ -94,9 +94,9 @@ jobs:
             ###  更新日志 ${{ steps.sync.outputs.start_tag }} -> ${{ steps.sync.outputs.end_tag }}:
               ${{ steps.sync.outputs.changes_with_asterisk }}
             ### 下载包说明
-              * ok-gf2-win32-online-setup.exe 在线安装包. 
-              * ok-gf2-win32-CPU-setup.exe 完整安装包. 
-              * ok-gf2-win32-global-setup.exe github source setup pakage
+              * [ok-gf2-win32-online-setup.exe](https://github.com/AliceJump/ok-gf2/releases/download/${{ github.ref_name }}/ok-gf2-win32-online-setup.exe) 在线安装包
+              * [ok-gf2-win32-china-setup.exe](https://github.com/AliceJump/ok-gf2/releases/download/${{ github.ref_name }}/ok-gf2-win32-china-setup.exe) 完整安装包
+              * [ok-gf2-win32-global-setup.exe](https://github.com/AliceJump/ok-gf2/releases/download/${{ github.ref_name }}/ok-gf2-win32-global-setup.exe) github source setup package
               * 不要下载SourceCode, Do Not Download the SourceCode
             ### 如果无法下载可以使用, 其他下载源
               * [Mirror酱下载渠道](https://mirrorchyan.com/zh/projects?rid=okgf&source=ok-gf-release), 国内网页直链, 下载需要购买CD-KEY, 已有Mirror酱CD-KEY可免费下载
