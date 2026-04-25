@@ -6,7 +6,8 @@ from typing import Union, List
 from ok import BaseTask, find_boxes_by_name, Box, Logger
 from src.image.frame_processs import isolate_by_hsv_ranges
 from functools import partial
-
+from src.image.hsv_config import HSVRange as hR
+from src.data.FeatureList import FeatureList as fL
 from src.interaction.ScreenPosition import ScreenPosition
 
 logger = Logger.get_logger(__name__)
@@ -172,12 +173,22 @@ class BaseGfTask(BaseTask):
     def is_main(self, recheck_time=0.0, esc=True):
         boxes = self.ocr(match=['整备室', '公共区', '活动层', re.compile('招募')], box='right', log=True)
         self.log_info(f'is main {len(boxes)} {boxes}')
-        if len(boxes) == 3:
+        if len(boxes) >= 3:
             if recheck_time:
                 self.sleep(recheck_time)
                 return self.is_main(recheck_time=0, esc=False)
             else:
                 return True
+        else:
+            feature_boxes = []
+            for feature in [fL.dog_icon, fL.message_icon]:
+                feature_boxes.extend(self.find_one(feature, vertical_variance=0.002, horizontal_variance=0.002, log=True))
+            if len(feature_boxes) + len(boxes) >= 4:
+                if recheck_time:
+                    self.sleep(recheck_time)
+                    return self.is_main(recheck_time=0, esc=False)
+                else:
+                    return True
         # if not self.do_handle_alert()[0]:
         if self.ocr(match=re.compile('^是否离开活动层'), log=True):
             self.wait_click_ocr(match='确认', after_sleep=2)
@@ -309,13 +320,12 @@ class BaseGfTask(BaseTask):
         if self.break_if_not_enough():
             self.wait_ocr(match=['自律'], box=self.box.bottom_right, raise_if_not_found=True)
             return 0
-        boxes = self.ocr(log=True, threshold=0.8)
+        boxes = self.ocr(log=True, threshold=0.8, frame_processor=self.make_hsv_isolator(hR.WHITE))
         if next_step := self.find_boxes(boxes, '下一步', self.box.bottom_right):
             self.click(next_step, after_sleep=1)
-            boxes = self.ocr(log=True, threshold=0.8)
+            boxes = self.ocr(log=True, threshold=0.8, frame_processor=self.make_hsv_isolator(hR.WHITE))
             # default_cost = 30
-        current = self.find_boxes(boxes, match=[stamina_re, number_re],
-                                  boundary=self.box_of_screen(0.84, 0, 0.99, 0.10))
+        current = self.ocr(match=[stamina_re, number_re], box=self.box_of_screen(0.84, 0, 0.99, 0.10))
         if current:
             current = int(current[0].name.split('/')[0])
         else:

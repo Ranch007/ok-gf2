@@ -7,8 +7,7 @@ class TestTask(BaseGfTask):
         super().__init__(*args, **kwargs)
         self.name = "测试用"
     def run(self):
-        self.send_key("f2", after_sleep=4)
-        result = self.ocr(match="一键领取", frame_processor=self.make_hsv_isolator(hR.WHITE),log=True)
+        result = self.ocr(match="下一步", frame_processor=self.make_hsv_isolator(hR.WHITE),log=True)
         if result:
             self.click(result)
             self.wait_pop_up()

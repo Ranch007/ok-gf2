@@ -70,6 +70,7 @@ config = {
         ["src.tasks.WeeklyTask", "WeeklyTask"],
         ["src.tasks.ClearMapTask", "ClearMapTask"],
         ["src.tasks.TestStartGame", "TestStartGame"],
+        ["src.tasks.TestTask", "TestTask"],
         ["ok", "DiagnosisTask"],
     ],
 }

@@ -11,6 +11,12 @@
             "file_name": "images/0.png",
             "width": 2560,
             "height": 1440
+        },
+        {
+            "id": 3,
+            "file_name": "images/1.png",
+            "width": 1920,
+            "height": 1080
         }
     ],
     "annotations": [
@@ -39,6 +45,32 @@
             ],
             "area": 1936,
             "iscrowd": 0
+        },
+        {
+            "id": 3,
+            "image_id": 3,
+            "category_id": 3,
+            "bbox": [
+                92,
+                833,
+                40,
+                37
+            ],
+            "area": 1480,
+            "iscrowd": 0
+        },
+        {
+            "id": 4,
+            "image_id": 3,
+            "category_id": 4,
+            "bbox": [
+                294,
+                955,
+                33,
+                24
+            ],
+            "area": 792,
+            "iscrowd": 0
         }
     ],
     "categories": [
@@ -50,6 +82,16 @@
         {
             "id": 2,
             "name": "ggq_can_button",
+            "supercategory": ""
+        },
+        {
+            "id": 3,
+            "name": "dog_icon",
+            "supercategory": ""
+        },
+        {
+            "id": 4,
+            "name": "message_icon",
             "supercategory": ""
         }
     ]
