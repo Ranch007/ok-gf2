@@ -380,18 +380,18 @@ class DailyTask(CommunityMixin, BaseGfTask):
                     )
                     up = None
                     down = None
+                    if to_clicks:
+                        for click in to_clicks:
+                            if re.search("下[篇筒]", click.name):
+                                down = click
+                            elif re.search("上[篇筒]", click.name):
+                                up = click
 
-                    for click in to_clicks:
-                        if re.search("下[篇筒]", click.name):
-                            down = click
-                        elif re.search("上[篇筒]", click.name):
-                            up = click
+                        if down:
+                            self.click(down)
 
-                    if down:
-                        self.click(down)
-
-                    if up:
-                        self.click(up)
+                        if up:
+                            self.click(up)
                     elif to_clicks := self.wait_ocr(match=['活动战役', re.compile('物资')], box=self.box.bottom,
                                                     raise_if_not_found=False, time_out=4, settle_time=2, log=True):
                         self.click(to_clicks, after_sleep=2)
