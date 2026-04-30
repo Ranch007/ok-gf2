@@ -166,24 +166,14 @@ class BaseGfTask(BaseTask):
 
     def is_main(self, recheck_time=0.0, esc=True):
         boxes = self.ocr(match=['整备室', '公共区', '活动层', re.compile('招募')], box='right', log=True)
-        self.log_info(f'is main {len(boxes)} {boxes}')
-        if len(boxes) >= 3:
-            if recheck_time:
-                self.sleep(recheck_time)
-                return self.is_main(recheck_time=0, esc=False)
-            else:
-                return True
-        else:
-            feature_boxes = []
-            for feature in [fL.dog_icon, fL.message_icon]:
-                if result:= self.find_one(feature, vertical_variance=0.002, horizontal_variance=0.002):
-                    feature_boxes.append(result)
-            if len(feature_boxes) + len(boxes) >= 2:
-                if recheck_time:
-                    self.sleep(recheck_time)
-                    return self.is_main(recheck_time=0, esc=False)
-                else:
-                    return True
+        feature_boxes = []
+        for feature in [fL.dog_icon, fL.message_icon]:
+            if result := self.find_one(feature, vertical_variance=0.002, horizontal_variance=0.002):
+                feature_boxes.append(result)
+        total = len(boxes) + len(feature_boxes)
+        self.log_info(f'is main ocr={len(boxes)} features={len(feature_boxes)} total={total}')
+        if total >= 2:
+            return True
         # if not self.do_handle_alert()[0]:
         if self.ocr(match=re.compile('^是否离开活动层'), log=True):
             self.wait_click_ocr(match='确认', after_sleep=2)
@@ -305,9 +295,9 @@ class BaseGfTask(BaseTask):
                 self.wait_ocr(match=['自律'], box=self.box.bottom_right, raise_if_not_found=True)
                 return 0
             self.click(plus_x, plus_y)
-            self.wait_click_ocr(match=["确认"], after_sleep=0, raise_if_not_found=False)
-            self.wait_click_ocr(match=["取消"], time_out=2, raise_if_not_found=False)
-            self.wait_pop_up(count=1)
+            self.wait_click_ocr(match=["确认"], after_sleep=1, raise_if_not_found=False)
+            if not self.wait_click_ocr(match=["取消"], time_out=2, raise_if_not_found=False):   
+                self.wait_pop_up(count=1)
             self.back_if_not_ocr_match(match=['自律'], box=self.box.bottom_right, raise_if_not_found=True)
             return 0
 
