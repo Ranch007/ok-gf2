@@ -70,13 +70,11 @@ class BaseGfTask(BaseTask):
 
     def skip_dialogs(self, end_match, end_box=None, time_out=120, has_dialog=True):
         self.info_set('current_task', 'skip_dialogs')
-        self.sleep(5)
         start = time.time()
         while time.time() - start < time_out:
             boxes = self.ocr()
             if skip := self.find_boxes(boxes, match=['跳过']):
                 self.click(skip)
-                self.sleep(2)
             elif no_alert := self.find_boxes(boxes, match='今日不再提示'):
                 self.click(no_alert)
                 self.sleep(0.2)
@@ -84,11 +82,9 @@ class BaseGfTask(BaseTask):
             elif result := self.find_boxes(boxes, match=end_match, boundary=end_box):
                 self.sleep(1)
                 return result
-            elif self.find_boxes(boxes, match=re.compile(r'回合$'), boundary='top_left'):
-                self.sleep(3)
             elif self.find_boxes(boxes, match=pop_ups):
                 self.back()
-                self.sleep(2)
+                self.sleep(1)
             else:
                 if has_dialog:
                     self.click_relative(0.95, 0.04)
@@ -104,14 +100,11 @@ class BaseGfTask(BaseTask):
         if result[0].name == '作战开始':
             self.sleep(2)
             self.click_box(result, after_sleep=1)
-            start_result = self.wait_ocr(match=[re.compile('行动结束'), re.compile('还有可部署')],
-                                         raise_if_not_found=False, time_out=30)
-            if not start_result:
-                start_result = self.wait_ocr(match=[re.compile('行动完成')], box=self.box.right,
-                                             raise_if_not_found=False, time_out=15)
-            ok_bool = bool(start_result) and "行动完成" in [r.name for r in start_result]
+            start_result = self.skip_dialogs(end_match=[re.compile('行动完成'), re.compile('行动结束'), re.compile('还有可部署'), re.compile('任务完成')],
+                                         has_dialog=True, time_out=45)
+            ok_bool = bool(start_result) and (not ("还有可部署" in start_result[0].name or "行动结束" in start_result[0].name))
             if not ok_bool:
-                if start_result and '行动结束' != start_result[0].name:
+                if start_result and ('还有可部署' in start_result[0].name):
                     self.log_info('阵容没上满!', notify=True)
 
                     self.wait_click_ocr(match=['确认'], box=self.box.bottom, time_out=5,
@@ -184,7 +177,7 @@ class BaseGfTask(BaseTask):
             for feature in [fL.dog_icon, fL.message_icon]:
                 if result:= self.find_one(feature, vertical_variance=0.002, horizontal_variance=0.002):
                     feature_boxes.append(result)
-            if len(feature_boxes) + len(boxes) >= 4:
+            if len(feature_boxes) + len(boxes) >= 2:
                 if recheck_time:
                     self.sleep(recheck_time)
                     return self.is_main(recheck_time=0, esc=False)
