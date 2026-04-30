@@ -505,14 +505,12 @@ class DailyTask(CommunityMixin, BaseGfTask):
             return
 
         # 步骤 3: 点击"确认"，带重试
-        if not self._auto_loop_step_with_retry(
+        self._auto_loop_step_with_retry(
             step_num=3,
             match=["确认"],
             settle_time=2,
             after_sleep=2,
-        ):
-            return
-
+        )
         # 步骤 4: 等待"循环结束"出现并点击（仅作为一次识别完成的角色，不需要重试）
         if not self.wait_click_ocr(
             match=re.compile("循环结束"), time_out=600, box=self.box.top, after_sleep=2, log=True
