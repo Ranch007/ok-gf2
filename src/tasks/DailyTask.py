@@ -458,7 +458,7 @@ class DailyTask(CommunityMixin, BaseGfTask):
             if self.config.get("自主循环"):
                 self.auto_loop()
 
-    def _auto_loop_step_with_retry(self, step_num, match, box=None, time_out=5, after_sleep=2, **kwargs):
+    def _auto_loop_step_with_retry(self, step_num, match, need_confirm=False, box=None, time_out=5, after_sleep=2, **kwargs):
         """
         点击OCR匹配元素，等待点击特征在 3s 内消失。
         若特征未消失则重试，最多尝试 3 次。
@@ -486,6 +486,9 @@ class DailyTask(CommunityMixin, BaseGfTask):
                 if not self.ocr(box=box, match=match):
                     self.sleep(after_sleep)
                     return result
+                if need_confirm and self.ocr(box=self.box.center, match='确认'):
+                    return result
+                    
                 self.sleep(0.3)
             if attempt < 2:
                 self.log_info(f"自主循环步骤{step_num}点击后特征未消失，重试 ({attempt + 2}/3)", notify=True)
@@ -508,18 +511,19 @@ class DailyTask(CommunityMixin, BaseGfTask):
             step_num=2,
             match="开始循环",
             box=self.box.bottom_left,
+            need_confirm=True,
             time_out=5,
             after_sleep=2,
         ):
             return
 
         # 步骤 3: 点击"确认"，带重试
-        self.wait_click_ocr(
+        self._auto_loop_step_with_retry(
             step_num=3,
             match=["确认"],
+            box=self.box.center,
             settle_time=2,
             after_sleep=2,
-            box=self.box.center
         )
         # 步骤 4: 等待"循环结束"出现并点击（仅作为一次识别完成的角色，不需要重试）
         if not self.wait_click_ocr(
