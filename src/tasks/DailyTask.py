@@ -237,6 +237,7 @@ class DailyTask(CommunityMixin, BaseGfTask):
                     if need_extra_confirm:
                         self.wait_click_ocr(match='确认', time_out=3, after_sleep=1)
                     self.skip_dialogs(end_match=skip_end_match, time_out=60)
+                    self.wait_click_ocr(match="确认", time_out=3, box = self.box.bottom, after_sleep=1)
                     self.wait_pop_up(count=1)
                 return True
             else:
@@ -487,7 +488,7 @@ class DailyTask(CommunityMixin, BaseGfTask):
                     return result
                 if need_confirm and self.ocr(box=self.box.center, match='确认'):
                     return result
-                    
+
                 self.sleep(0.3)
             if attempt < 2:
                 self.log_info(f"自主循环步骤{step_num}点击后特征未消失，重试 ({attempt + 2}/3)", notify=True)
