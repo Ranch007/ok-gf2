@@ -6,3 +6,4 @@ class FeatureList(str, Enum):
     free_eat_entry = 'free_eat_entry'
     ggq_can_button = 'ggq_can_button'
     message_icon = 'message_icon'
+    not_clear_one = 'not_clear_one'

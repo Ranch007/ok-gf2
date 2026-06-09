@@ -2,6 +2,7 @@ import re
 from ok import Logger
 from src.tasks.BaseGfTask import BaseGfTask, map_re
 from src.image.hsv_config import HSVRange as hR
+from src.data.FeatureList import FeatureList as fL
 logger = Logger.get_logger(__name__)
 
 
@@ -80,6 +81,7 @@ class ClearMapTask(BaseGfTask):
                 maps = []
                 for p in processors:
                     maps.extend(self.ocr(box=map_ocr_box, match=map_re, log=True, frame_processor=p))
+                maps.extend(self.find_feature(feature_name=fL.not_clear_one, box=map_ocr_box))
 
                 maps,map_name_groups  = merge_maps(maps, x_threshold=40/1920*self.width, y_threshold=40/1080*self.height)
 
@@ -96,11 +98,16 @@ class ClearMapTask(BaseGfTask):
             checked = False
             current_map = None
             for i, current_map in enumerate(maps):
-                # 找到对应的名字组
-                name_group = map_name_groups[i]  # map_name_groups 和 maps 是一一对应的
-                # 判断这个组的所有名字是否已经点击过
+                name_group = map_name_groups[i]
+
+                # 特殊特征永远允许点击
+                if fL.not_clear_one in name_group:
+                    checked = True
+                    last_clicked = current_map
+                    self.click(current_map, after_sleep=2)
+                    break
+
                 if not any(name in clicked for name in name_group):
-                    # 全部加入 clicked
                     clicked.extend(name_group)
                     checked = True
                     last_clicked = current_map

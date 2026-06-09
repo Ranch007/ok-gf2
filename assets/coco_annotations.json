@@ -17,6 +17,12 @@
             "file_name": "images/1.png",
             "width": 1920,
             "height": 1080
+        },
+        {
+            "id": 4,
+            "file_name": "images/1.png",
+            "width": 1920,
+            "height": 1080
         }
     ],
     "annotations": [
@@ -71,6 +77,19 @@
             ],
             "area": 792,
             "iscrowd": 0
+        },
+        {
+            "id": 5,
+            "image_id": 4,
+            "category_id": 5,
+            "bbox": [
+                553,
+                515,
+                24,
+                26
+            ],
+            "area": 624,
+            "iscrowd": 0
         }
     ],
     "categories": [
@@ -92,6 +111,11 @@
         {
             "id": 4,
             "name": "message_icon",
+            "supercategory": ""
+        },
+        {
+            "id": 5,
+            "name": "not_clear_one",
             "supercategory": ""
         }
     ]
