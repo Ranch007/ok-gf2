@@ -645,10 +645,8 @@ class DailyTask(CommunityMixin, BaseGfTask):
         self.info_set('current_task', 'guild')
         if result := self.wait_ocr(match=['班组'], box=self.box._group, raise_if_not_found=True):
             self.click_box_by_match_position(result, "班组", after_sleep=2)
-            self.wait_click_ocr(match=['要务'], box=self.box.bottom_right, after_sleep=0.5, raise_if_not_found=True,
-                                settle_time=2)
-            result = self.wait_ocr(match=['开始作战', '每日要务已完成'], box=self.box.bottom_right,
-                                   raise_if_not_found=True, log=True)
+            self.wait_click_ocr(match=['要务'], box=self.box.bottom_right, after_sleep=0.5, settle_time=2)
+            result = self.wait_ocr(match=['开始作战', '每日要务已完成'], box=self.box.bottom_right, raise_if_not_found=True, log=True)
             if result[0].name == '开始作战':
                 self.click(result)
                 self.auto_battle()

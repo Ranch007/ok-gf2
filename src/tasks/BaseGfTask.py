@@ -11,7 +11,7 @@ from src.data.FeatureList import FeatureList as fL
 from src.interaction.ScreenPosition import ScreenPosition
 
 logger = Logger.get_logger(__name__)
-pop_ups = ['点击空白处关闭', '点击屏幕任意位置继续', '点击任意位置继续']
+pop_ups = ['点击空白处关闭', '点击屏幕任意位置继续', '点击任意位置继续', '新周期开启']
 number_re = re.compile(r"^\d+$")
 stamina_re = re.compile(r"^\d+/\d+")
 map_re = re.compile(r"^.{0,2}\s*-?\s*\d{1,2}\s*-\s*\d{1,2}\s*\*?$")
@@ -73,7 +73,13 @@ class BaseGfTask(BaseTask):
         self.info_set('current_task', 'skip_dialogs')
         start = time.time()
         while time.time() - start < time_out:
-            boxes = self.ocr()
+            try:
+                boxes = self.ocr()
+            except AttributeError:
+                self.log_info('WGC 抓帧返回空帧，等待 3s 后重试', notify=False)
+                self.sleep(3)
+                self.next_frame()
+                continue
             if skip := self.find_boxes(boxes, match=['跳过']):
                 self.click(skip, after_sleep=2)
             elif no_alert := self.find_boxes(boxes, match='今日不再提示'):
@@ -81,6 +87,11 @@ class BaseGfTask(BaseTask):
                 self.sleep(0.2)
                 self.click(self.find_boxes(boxes, match='确认'), after_sleep=2)
             elif result := self.find_boxes(boxes, match=end_match, boundary=end_box):
+                # 优先返回"继续前进"
+                for r in result:
+                    if r.name == '继续前进':
+                        self.sleep(1)
+                        return [r]
                 self.sleep(1)
                 return result
             elif self.find_boxes(boxes, match=pop_ups):
@@ -97,13 +108,25 @@ class BaseGfTask(BaseTask):
     def auto_battle(self, end_match=None, end_box=None, has_dialog=False, need_click_auto=False,
                     has_dialog_behind_start=False):
         self.info_set('current_task', 'auto battle')
-        result = self.skip_dialogs(end_match=['作战开始', '行动结束'], end_box=self.box.bottom, time_out=120,
+        result = self.skip_dialogs(end_match=['作战开始', '行动结束', '继续前进'], end_box=self.box.bottom, time_out=120,
                                    has_dialog=has_dialog, raise_if_not_found=False)
+        if result and result[0].name == '继续前进':
+            self.log_info('开局检测到继续前进，点击后开启新一轮自动战斗', notify=True)
+            self.click_box(result, after_sleep=2)
+            self.auto_battle(end_match=end_match, end_box=end_box, has_dialog=has_dialog,
+                             need_click_auto=need_click_auto, has_dialog_behind_start=has_dialog_behind_start)
+            return
         if result[0].name == '作战开始':
             self.sleep(2)
             self.click_box(result, after_sleep=1)
-            start_result = self.skip_dialogs(end_match=[re.compile('行动完成'), re.compile('行动结束'), re.compile('还有可部署'), re.compile('任务完成')],
+            start_result = self.skip_dialogs(end_match=[re.compile('行动完成'), re.compile('行动结束'), re.compile('还有可部署'), re.compile('任务完成'), re.compile('继续前进')],
                                          has_dialog=True, time_out=45, raise_if_not_found=False)
+            if start_result and '继续前进' in start_result[0].name:
+                self.log_info('开局后检测到继续前进，点击后开启新一轮自动战斗', notify=True)
+                self.click_box(start_result, after_sleep=2)
+                self.auto_battle(end_match=end_match, end_box=end_box, has_dialog=has_dialog,
+                                 need_click_auto=need_click_auto, has_dialog_behind_start=has_dialog_behind_start)
+                return
             ok_bool = bool(start_result) and (not ("还有可部署" in start_result[0].name or "行动结束" in start_result[0].name))
             if not ok_bool:
                 if start_result and ('还有可部署' in start_result[0].name):
@@ -116,9 +139,15 @@ class BaseGfTask(BaseTask):
                     # start_result = self.wait_ocr(match=['行动结束'], box=self.box.bottom_right,
                     #                              raise_if_not_found=False, time_out=15)
                 if not start_result and has_dialog_behind_start:
-                    start_result = self.skip_dialogs(end_match=['作战开始', '行动结束'], end_box=self.box.bottom,
+                    start_result = self.skip_dialogs(end_match=['作战开始', '行动结束', '继续前进'], end_box=self.box.bottom,
                                                      time_out=120,
                                                      has_dialog=has_dialog, raise_if_not_found=False)
+                    if start_result and start_result[0].name == '继续前进':
+                        self.log_info('开局二次检测到继续前进，点击后开启新一轮自动战斗', notify=True)
+                        self.click_box(start_result, after_sleep=2)
+                        self.auto_battle(end_match=end_match, end_box=end_box, has_dialog=has_dialog,
+                                         need_click_auto=need_click_auto, has_dialog_behind_start=has_dialog_behind_start)
+                        return
                     if self.wait_ocr(match='注意', box=self.box.top):
                         self.wait_click_ocr(match='取消', after_sleep=2)
                 if start_result and need_click_auto:
@@ -128,14 +157,25 @@ class BaseGfTask(BaseTask):
                     else:
                         self.click_relative(0.88, 0.04, after_sleep=1)
 
+        clicked_continue = False
         while results := self.skip_dialogs(
-                end_match=['任务完成', '任务失败', '战斗失败', '对战胜利', '对战失败', '确认', '确认结算'],
+                end_match=['任务完成', '任务失败', '战斗失败', '对战胜利', '对战失败', '确认', '确认结算', '继续前进'],
                 time_out=900,
                 has_dialog=has_dialog):
+            # 优先遍历所有结果找"继续前进"
+            clicked = False
             for result in results:
-                if result.name in ("确认", "确认结算"):
+                if result.name == '继续前进':
                     self.click_box(result, after_sleep=2)
+                    clicked = True
+                    clicked_continue = True
                     break
+            if not clicked:
+                for result in results:
+                    if result.name in ("确认", "确认结算"):
+                        self.click_box(result, after_sleep=2)
+                        clicked = True
+                        break
             self.sleep(2)
             self.click_box(results, after_sleep=2)
             if results[0].name not in pop_ups:
@@ -144,6 +184,16 @@ class BaseGfTask(BaseTask):
             raise Exception('自动战斗异常')
         if results[0].name == '任务失败':
             raise Exception('任务失败, 没打过!')
+        if clicked_continue:
+            self.log_info('检测到继续前进，点击后开启新一轮自动战斗', notify=True)
+            self.auto_battle(end_match=end_match, end_box=end_box, has_dialog=has_dialog,
+                             need_click_auto=need_click_auto, has_dialog_behind_start=has_dialog_behind_start)
+            return
+        if self.wait_click_ocr(match='继续前进', box=self.box.bottom_right, raise_if_not_found=False, time_out=3):
+            self.log_info('结算后检测到继续前进，点击后开启新一轮自动战斗', notify=True)
+            self.auto_battle(end_match=end_match, end_box=end_box, has_dialog=has_dialog,
+                             need_click_auto=need_click_auto, has_dialog_behind_start=has_dialog_behind_start)
+            return
         while self.wait_click_ocr(match='确认', box=self.box.bottom_right, raise_if_not_found=False, time_out=3):
             pass
         if end_match:
@@ -153,6 +203,7 @@ class BaseGfTask(BaseTask):
                 end_match = [end_match] + pop_ups
             end_match.append('确认')
             end_match.append('确认结算')
+            end_match.append('继续前进')
             while True:
                 match = self.wait_ocr(match=end_match, box=end_box, raise_if_not_found=True, time_out=30)
                 if match[0].name in pop_ups:
@@ -160,6 +211,12 @@ class BaseGfTask(BaseTask):
                     continue
                 if match:
                     self.log_info(f'battle end matched: {match}')
+                    if match[0].name == '继续前进':
+                        self.log_info('最后阶段检测到继续前进，点击后开启新一轮自动战斗', notify=True)
+                        self.click_box(match, after_sleep=2)
+                        self.auto_battle(end_match=end_match, end_box=end_box, has_dialog=has_dialog,
+                                         need_click_auto=need_click_auto, has_dialog_behind_start=has_dialog_behind_start)
+                        return
                     if match[0].name in ("确认", "确认结算"):
                         self.click_box(match, after_sleep=8)
                     break
