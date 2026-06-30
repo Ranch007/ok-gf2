@@ -64,7 +64,7 @@ class ClearMapTask(BaseGfTask):
                 pattern = re.compile(re.escape(last_failed_name))
 
                 for p in processors:
-                    maps = self.ocr(box=map_ocr_box, match=pattern, log=True, frame_processor=p)
+                    maps = self.ocr(match=pattern, log=True, frame_processor=p)
                     if maps:
                         break
 
@@ -80,9 +80,17 @@ class ClearMapTask(BaseGfTask):
 
                 maps = []
                 for p in processors:
-                    maps.extend(self.ocr(box=map_ocr_box, match=map_re, log=True, frame_processor=p))
+                    maps.extend(self.ocr(match=map_re, log=True, frame_processor=p))
                 maps.extend(self.find_feature(feature_name=fL.not_clear_one, box=map_ocr_box))
+                now_icon_y_offset = 0.489-0.380
+                now_icon=[self.wait_feature(feature=fL.now_icon, box=map_ocr_box)]
+                if now_icon[0]:
+                    for i in range(len(now_icon)):
+                        now_icon[i].y=int(now_icon[i].y+now_icon_y_offset*self.height)
+                else:
+                    now_icon=[]
 
+                maps.extend(now_icon)
                 maps,map_name_groups  = merge_maps(maps, x_threshold=40/1920*self.width, y_threshold=40/1080*self.height)
 
             maps = sorted(maps, key=lambda obj: obj.x)
@@ -101,7 +109,7 @@ class ClearMapTask(BaseGfTask):
                 name_group = map_name_groups[i]
 
                 # 特殊特征永远允许点击
-                if fL.not_clear_one in name_group:
+                if fL.not_clear_one in name_group or fL.now_icon in name_group:
                     checked = True
                     last_clicked = current_map
                     self.click(current_map, after_sleep=2)
