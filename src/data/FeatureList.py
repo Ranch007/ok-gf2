@@ -7,3 +7,4 @@ class FeatureList(str, Enum):
     ggq_can_button = 'ggq_can_button'
     message_icon = 'message_icon'
     not_clear_one = 'not_clear_one'
+    now_icon = 'now_icon'
