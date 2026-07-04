@@ -108,7 +108,6 @@ class WeeklyTask(BaseGfTask):
                 if result == results[-1]:
                     self.wait_pop_up(count=1)
                     if self.wait_click_ocr(match='当期实练奖励', box='bottom_right', after_sleep=2):
-                        if self.wait_until(self.ocr(match="一键领取",frame_processor=self.make_hsv_isolator(hR.WHITE)),time_out=2):
-                            if result:= self.ocr(match="一键领取", frame_processor=self.make_hsv_isolator(hR.WHITE)):
-                                self.click(result[0], after_sleep=2)
+                        if result:= self.ocr(match="一键领取", frame_processor=self.make_hsv_isolator(hR.WHITE)):
+                            self.click(result[0], after_sleep=2)
         self.ensure_main()
